@@ -6,9 +6,6 @@ let Bot  = require('@kikinteractive/kik');
 let config = require('./config');
 let apiToken = 'f3bf44dd39b2b55a98f0ea49390b157c';
 let uwapi = require('uwapi')(apiToken);
-uwapi.foodservicesMenu().then(function(data) {
-  console.log(data);
-});
 /////////////////API ENDPOINT CONFIG////////////////////////
 let bot = new Bot({
     username: config.bot_name,
@@ -21,7 +18,6 @@ bot.send('Bot Active', 'justinpezzack');
 ///////////////////////EVENT HANDLERS////////////////////////
 //Fires when a user talks to the bot for the very first time
 bot.onStartChattingMessage((message) => {
-    console.log('New user');
     bot.getUserProfile(message.from)
         .then((user) => {
             message.reply(`Hey ${user.firstName}! Enter a day to find the day's menu (i.e Tuesday)`);
@@ -29,14 +25,15 @@ bot.onStartChattingMessage((message) => {
 });
 //Fires when a user sends a message
 bot.onTextMessage((message, bot) => {
-    if (message.body == 'Monday' || message.body == 'Tuesday' || message.body == 'Wednesday' || message.body == 'Thursday' || message.body == 'Friday') {
-        let menu = uwapi.foodservicesMenu().then(function(data) {
-          return data;
+        var day_dict = {"Monday" : 0, "Tuesday" : 1, "Wednesday" : 2, "Thursday" : 3, "Friday" : 4}
+        var msg = message['_state'].body;
+        var day = day_dct[msg];
+        uwapi.foodservicesMenu().then(function(data) {
+          message.reply("This is what is for the lunch today:");
+          for (var i = 0; i <3; i ++) {
+            message.reply(data['outlets'][0]['menu'][day]['meals']['lunch'][i]["product_name"] + "\n");
+        }
         });
-        console.log(menu)
-    } else {
-      message.reply("Ahhhh I don't understand, type 'help' and I can give you a hand");
-    }
 });
 ////////////////////////BOT LOGIC////////////////////////////
 
