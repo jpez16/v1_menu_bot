@@ -25,16 +25,42 @@ bot.onStartChattingMessage((message) => {
 });
 //Fires when a user sends a message
 bot.onTextMessage((message, bot) => {
-        var day_dict = {"Monday" : 0, "Tuesday" : 1, "Wednesday" : 2, "Thursday" : 3, "Friday" : 4}
-        var msg = message['_state'].body;
-        var day = day_dct[msg];
-        uwapi.foodservicesMenu().then(function(data) {
-          message.reply("This is what is for the lunch today:");
-          for (var i = 0; i <3; i ++) {
-            message.reply(data['outlets'][0]['menu'][day]['meals']['lunch'][i]["product_name"] + "\n");
+        let base_api_data = data['outlets'][0]['menu'];
+        if (base_api_date.length < 5){
+          //Have to deal with a shortened week.
+          console.log("short_week");
+
         }
-        });
-});
+        let day_dict = {"Monday" : 0, "Tuesday" : 1, "Wednesday" : 2, "Thursday" : 3, "Friday" : 4}
+        let msg = message['_state'].body;
+        let day = day_dict[msg];
+        if (msg == "Monday" || msg == "Tuesday" || msg == "Wednesday" || msg == "Thursday" || msg == "Friday") {
+          uwapi.foodservicesMenu().then(function(data) {
+            //LUNCH
+            let lunch = base_api_data[day]['meals']['lunch'];
+            let lunch_string = "";
+            message.reply("For Lunch on " + msg + ":");
+            for (var i = 0; i < lunch.length; i ++) {
+              lunch_string += (lunch[i]["product_name"]);
+              if (i<lunch.length-1){
+                lunch_string += ",\n";
+              }
+            }
+            message.reply(lunch_string);
+            //DINNER
+            let dinner = base_api_data[day]['meals']['dinner'];
+            message.reply("For Dinner on " + msg + ":");
+            let dinner_string ="";
+            for (var i = 0; i < dinner.length; i ++) {
+              dinner_string += (dinner[i]["product_name"]);
+              if (i < dinner.length-1){
+                dinner_string += ",\n";
+              }
+            }
+            message.reply(dinner_string);
+          });
+        }
+    });
 ////////////////////////BOT LOGIC////////////////////////////
 
 ///////////////////////SERVER CONFIG/////////////////////////
