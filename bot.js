@@ -3,8 +3,7 @@
 let util = require('util');
 let http = require('http');
 let Bot  = require('@kikinteractive/kik');
-
-var sourceFile = require('./config');
+let sourceFile = require('./config');
 // Server Config
 const port = 8000;
 
@@ -18,15 +17,14 @@ let bot = new Bot({
 bot.updateBotConfiguration();
 //Events
 //Fires when a user talks to the bot for the very first time
-bot.onStartChattingMessage(function (message) {
+bot.onStartChattingMessage((message) => {
     console.log('start');
     bot.getUserProfile(message.from)
         .then((user) => {
             message.reply(`Hey ${user.firstName}!`);
         });
 });
-bot.onTextMessage(function (message, bot) {
-    console.log(message + "\n" + bot);
+bot.onTextMessage((message, bot) => {
     if (message.body == 'help') {
         message.reply('xyz');
     }
