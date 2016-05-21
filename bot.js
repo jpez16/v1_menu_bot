@@ -25,24 +25,25 @@ bot.onStartChattingMessage((message) => {
 });
 //Fires when a user sends a message
 bot.onTextMessage((message, bot) => {
-        let base_api_data = data['outlets'][0]['menu'];
-        if (base_api_date.length < 5){
-          //Have to deal with a shortened week.
-          console.log("short_week");
-
-        }
         let day_dict = {"Monday" : 0, "Tuesday" : 1, "Wednesday" : 2, "Thursday" : 3, "Friday" : 4}
         let msg = message['_state'].body;
         let day = day_dict[msg];
         if (msg == "Monday" || msg == "Tuesday" || msg == "Wednesday" || msg == "Thursday" || msg == "Friday") {
           uwapi.foodservicesMenu().then(function(data) {
+            //CHECK FOR 4 DAY WEEK  
+            let base_api_data = data['outlets'][0]['menu'];
+            if (base_api_date.length < 5){
+              //Have to deal with a shortened week.
+              console.log(base_api_data);
+
+            }
             //LUNCH
             let lunch = base_api_data[day]['meals']['lunch'];
             let lunch_string = "";
             message.reply("For Lunch on " + msg + ":");
             for (var i = 0; i < lunch.length; i ++) {
               lunch_string += (lunch[i]["product_name"]);
-              if (i<lunch.length-1){
+              if (i < lunch.length-1){
                 lunch_string += ",\n";
               }
             }
@@ -59,10 +60,10 @@ bot.onTextMessage((message, bot) => {
             }
             message.reply(dinner_string);
           });
+        } else {
+          message.reply("Please enter a valid day: Monday, Tuesday, Wednesday, Thursday, Friday");
         }
     });
-////////////////////////BOT LOGIC////////////////////////////
-
 ///////////////////////SERVER CONFIG/////////////////////////
 let server = http.createServer(bot.incoming());
 server.listen(process.env.PORT || config.port);
