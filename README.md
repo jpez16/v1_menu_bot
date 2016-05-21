@@ -1,4 +1,6 @@
-config.js
+# GPA Bot for Kik
+
+##config.js
 ```javascript
 module.exports = {
   port : "8000",
