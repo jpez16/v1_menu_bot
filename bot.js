@@ -4,7 +4,7 @@ let util = require('util');
 let http = require('http');
 let Bot  = require('@kikinteractive/kik');
 let config = require('./config');
-let apiToken = 'f3bf44dd39b2b55a98f0ea49390b157c';
+let apiToken = config.uw_api_token;
 let uwapi = require('uwapi')(apiToken);
 /////////////////API ENDPOINT CONFIG////////////////////////
 let bot = new Bot({
