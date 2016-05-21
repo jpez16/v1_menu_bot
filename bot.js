@@ -3,6 +3,8 @@
 let util = require('util');
 let http = require('http');
 let Bot  = require('@kikinteractive/kik');
+
+var sourceFile = require('./config');
 // Server Config
 const port = 8000;
 
