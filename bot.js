@@ -22,15 +22,12 @@ bot.onStartChattingMessage((message) => {
     console.log('New user');
     bot.getUserProfile(message.from)
         .then((user) => {
-            message.reply(`Hey ${user.firstName}!`);
+            message.reply(`Hey ${user.firstName}! I'm GPA Bot, I can help you calculate your Grade Point Average.`);
         });
 });
 bot.onTextMessage((message, bot) => {
     if (message.body == 'help') {
         message.reply('xyz');
-    }
-    else if (message.body == 'nignog') {
-      message.reply('nignog');
     } else {
       message.reply("Ahhhh I don't understand, type 'help' and I can give you a hand");
     }
