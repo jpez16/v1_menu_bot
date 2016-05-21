@@ -4,19 +4,35 @@ let util = require('util');
 let http = require('http');
 let Bot  = require('@kikinteractive/kik');
 // Server Config
-const port = 8080
+const port = 8000;
 
 // Configure the bot API endpoint, details for your bot
 let bot = new Bot({
     username: 'gpa.bot',
     apiKey: 'df1e2b51-0391-4852-b008-ba1a8d25cc7e',
-    baseUrl: 'https://kik-echobot.ngrok.io/'
+    baseUrl: 'https://527fb897.ngrok.io'
 });
 
 bot.updateBotConfiguration();
 //Events
-bot.onTextMessage((message) => {
-    message.reply('wow');
+//Fires when a user talks to the bot for the very first time
+bot.onStartChattingMessage(function (message) {
+    console.log('start');
+    bot.getUserProfile(message.from)
+        .then((user) => {
+            message.reply(`Hey ${user.firstName}!`);
+        });
+});
+bot.onTextMessage(function (message, bot) {
+    console.log(message + "\n" + bot);
+    if (message.body == 'help') {
+        message.reply('xyz');
+    }
+    else if (message.body == 'nignog') {
+      message.reply('nignog');
+    } else {
+      message.reply("Ahhhh I don't understand, type 'help' and I can give you a hand");
+    }
 });
 
 // Set up your server and start listening
