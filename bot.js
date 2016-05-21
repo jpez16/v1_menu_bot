@@ -19,7 +19,7 @@ bot.updateBotConfiguration();
 //Events
 //Fires when a user talks to the bot for the very first time
 bot.onStartChattingMessage((message) => {
-    console.log('start');
+    console.log('New user');
     bot.getUserProfile(message.from)
         .then((user) => {
             message.reply(`Hey ${user.firstName}!`);
