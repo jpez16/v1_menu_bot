@@ -3,16 +3,17 @@
 let util = require('util');
 let http = require('http');
 let Bot  = require('@kikinteractive/kik');
-let sourceFile = require('./config');
-// Server Config
-const port = 8000;
+let config = require('./config');
 
 // Configure the bot API endpoint, details for your bot
+console.log(config);
 let bot = new Bot({
-    username: 'gpa.bot',
-    apiKey: 'df1e2b51-0391-4852-b008-ba1a8d25cc7e',
-    baseUrl: 'https://527fb897.ngrok.io'
+    username: config.bot_name,
+    apiKey: config.api_key,
+    baseUrl: config.base_url
 });
+//DEV
+bot.send('Bot Active', 'justinpezzack');
 
 bot.updateBotConfiguration();
 //Events
@@ -37,5 +38,5 @@ bot.onTextMessage((message, bot) => {
 
 // Set up your server and start listening
 let server = http.createServer(bot.incoming());
-server.listen(process.env.PORT || port);
-console.log("Bot running on port " + port);
+server.listen(process.env.PORT || config.port);
+console.log("Bot running on port " + config.port);
