@@ -1,4 +1,4 @@
-# GPA Bot for Kik
+# Village 1 Cafe Kik Bot
 
 ##config.js
 ```javascript
