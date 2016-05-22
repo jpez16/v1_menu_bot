@@ -12,6 +12,11 @@ let bot = new Bot({
     baseUrl: config.base_url
 });
 bot.updateBotConfiguration();
+//bot.send(Bot.Message.text('Hey, nice to meet you!').addResponseKeyboard({
+//"type": "text",
+//"body": "Suggested text"
+//}), 'justinpezzack');
+
 ///////////////////////////DEV///////////////////////////////
 //bot.send('Bot Active', 'justinpezzack');
 console.log(config);
@@ -20,15 +25,24 @@ console.log(config);
 bot.onStartChattingMessage((message) => {
     bot.getUserProfile(message.from)
         .then((user) => {
-            message.reply(`Hey ${user.firstName}! Enter a day to find the day's menu (i.e Tuesday)`);
-        });
+          bot.getUserProfile(message.from)
+          .then((user) => {
+              bot.send(Bot.Message.text('Please enter a valid day').addResponseKeyboard(
+                [
+                  "Monday",
+                  "Tuesday",
+                  "Wednesday",
+                  "Thursday",
+                  "Friday",
+              ]), `${user.username}`);
+          });
+          });
 });
 //Fires when a user sends a message
-bot.onTextMessage((message, bot) => {
+bot.onTextMessage((message) => {
         let day_dict = {"Monday" : 0, "Tuesday" : 1, "Wednesday" : 2, "Thursday" : 3, "Friday" : 4}
         let msg = message['_state'].body;
         let day = day_dict[msg];
-        console.log(msg);
         if (msg == "Monday" || msg == "Tuesday" || msg == "Wednesday" || msg == "Thursday" || msg == "Friday") {
           uwapi.foodservicesMenu().then(function(data) {
             //CHECK FOR 4 DAY WEEK
@@ -45,8 +59,6 @@ bot.onTextMessage((message, bot) => {
                   message.reply("There is no planned menu for " + msg + ".")
                 }
               }
-
-
             }
             //LUNCH
             let lunch = base_api_data[day]['meals']['lunch'];
@@ -72,8 +84,19 @@ bot.onTextMessage((message, bot) => {
             message.reply(dinner_string);
           });
         } else {
-          message.reply("Please enter a valid day: Monday, Tuesday, Wednesday, Thursday, Friday");
+          message.reply("Invalid day.");
         }
+        bot.getUserProfile(message.from)
+        .then((user) => {
+            bot.send(Bot.Message.text('Tap a day to see menu:').addResponseKeyboard(
+              [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+            ]), `${user.username}`);
+        });
     });
 ///////////////////////SERVER CONFIG/////////////////////////
 let server = http.createServer(bot.incoming());
