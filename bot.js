@@ -27,7 +27,7 @@ bot.onStartChattingMessage((message) => {
         .then((user) => {
           bot.getUserProfile(message.from)
           .then((user) => {
-              bot.send(Bot.Message.text('Please enter a valid day').addResponseKeyboard(
+              bot.send(Bot.Message.text("Hi I'm V1Menu Bot! I can show you whats being served in the cafe! Tape a day to see the menu.").addResponseKeyboard(
                 [
                   "Monday",
                   "Tuesday",
