@@ -11,12 +11,9 @@ let bot = new Bot({
     apiKey: config.api_key,
     baseUrl: config.base_url
 });
-  uwapi.foodservicesMenu().then(function(data) {
-    console.log(data);
-  });
 bot.updateBotConfiguration();
 ///////////////////////////DEV///////////////////////////////
-bot.send('Bot Active', 'justinpezzack');
+//bot.send('Bot Active', 'justinpezzack');
 console.log(config);
 ///////////////////////EVENT HANDLERS////////////////////////
 //Fires when a user talks to the bot for the very first time
