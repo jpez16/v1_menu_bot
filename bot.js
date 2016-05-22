@@ -27,7 +27,7 @@ bot.onStartChattingMessage((message) => {
         .then((user) => {
           bot.getUserProfile(message.from)
           .then((user) => {
-              bot.send(Bot.Message.text("Hi I'm V1Menu Bot! I can show you whats being served in the cafe! Tape a day to see the menu.").addResponseKeyboard(
+              bot.send(Bot.Message.text("Hi I'm V1Menu Bot! I can show you whats being served in the cafe! Tap a day to see the menu.").addResponseKeyboard(
                 [
                   "Monday",
                   "Tuesday",
@@ -35,8 +35,8 @@ bot.onStartChattingMessage((message) => {
                   "Thursday",
                   "Friday",
               ]), `${user.username}`);
-          });
-          });
+        });
+    });
 });
 //Fires when a user sends a message
 bot.onTextMessage((message) => {
@@ -62,8 +62,7 @@ bot.onTextMessage((message) => {
             }
             //LUNCH
             let lunch = base_api_data[day]['meals']['lunch'];
-            let lunch_string = "";
-            message.reply("For Lunch on " + msg + ":");
+            let lunch_string = "Lunch, 11:30 am - 2:00 pm:\n";
             for (var i = 0; i < lunch.length; i ++) {
               lunch_string += (lunch[i]["product_name"]);
               if (i < lunch.length-1) {
@@ -73,8 +72,7 @@ bot.onTextMessage((message) => {
             message.reply(lunch_string);
             //DINNER
             let dinner = base_api_data[day]['meals']['dinner'];
-            message.reply("For Dinner on " + msg + ":");
-            let dinner_string ="";
+            let dinner_string ="Dinner, 4:30 - 8:00 pm:\n";
             for (var i = 0; i < dinner.length; i ++) {
               dinner_string += (dinner[i]["product_name"]);
               if (i < dinner.length-1){
@@ -88,7 +86,7 @@ bot.onTextMessage((message) => {
         }
         bot.getUserProfile(message.from)
         .then((user) => {
-            bot.send(Bot.Message.text('Tap a day to see menu:').addResponseKeyboard(
+            bot.send(Bot.Message.text('Tap a day to see a menu:').addResponseKeyboard(
               [
                 "Monday",
                 "Tuesday",
