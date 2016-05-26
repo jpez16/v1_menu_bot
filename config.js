@@ -1,7 +1,7 @@
 module.exports = {
-  port         : "<your_port>",
-  bot_name     : "<your_bot_name>",
-  api_key      : "<your_api_key>",
-  uw_api_token : "<your_uw_api_key>",
-  base_url     : 'https://xxxx.ngrok.io' //for testing purposes use ngrok
+  port : "8000",
+  bot_name : "v1test",
+  api_key : "5619b2e3-c1e7-4447-b981-6006a8bead3e",
+  uw_api_token: "f3bf44dd39b2b55a98f0ea49390b157c",
+  base_url : "https://44305987.ngrok.io",
 };

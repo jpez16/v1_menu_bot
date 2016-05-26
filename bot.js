@@ -3,6 +3,7 @@
 let util = require('util');
 let http = require('http');
 let Bot  = require('@kikinteractive/kik');
+let moment = require('moment');
 let config = require('./config');
 let uwapi = require('uwapi')(config.uw_api_token);
 /////////////////API ENDPOINT CONFIG////////////////////////
@@ -22,6 +23,7 @@ bot.updateBotConfiguration();
 console.log(config);
 ///////////////////////EVENT HANDLERS////////////////////////
 //Fires when a user talks to the bot for the very first time
+
 
 bot.onStartChattingMessage((message) => {
     bot.getUserProfile(message.from)
@@ -45,6 +47,12 @@ bot.onTextMessage((message) => {
         let day_dict = {"Monday" : 0, "Tuesday" : 1, "Wednesday" : 2, "Thursday" : 3, "Friday" : 4};
         let msg = message['_state'].body.toLowerCase();
         var query = false;
+        if (msg == "saturday"){
+
+        }
+        else if (msg == "sunday") {
+
+        }
         if(msg.indexOf('lunch')>-1) {
           lunch_asked = true;
         }
@@ -84,25 +92,13 @@ bot.onTextMessage((message) => {
             //LUNCH
             if(lunch_asked){
               let lunch = base_api_data[day]['meals']['lunch'];
-              let lunch_string = "Lunch, 11:30 am - 2:00 pm:\n";
-              for (var i = 0; i < lunch.length; i ++) {
-                lunch_string += (lunch[i]["product_name"]);
-                if (i < lunch.length-1) {
-                  lunch_string += ",\n";
-                }
-              }
+              let lunch_string = build_lunch_string(lunch);
               message.reply(lunch_string);
             }
             //DINNER
             if(dinner_asked) {
               let dinner = base_api_data[day]['meals']['dinner'];
-              let dinner_string ="Dinner, 4:30 - 8:00 pm:\n";
-              for (var i = 0; i < dinner.length; i ++) {
-                dinner_string += (dinner[i]["product_name"]);
-                if (i < dinner.length-1){
-                  dinner_string += ",\n";
-                }
-              }
+              let dinner_string = build_dinner_string(dinner);
               message.reply(dinner_string);
             }
           });
@@ -112,14 +108,7 @@ bot.onTextMessage((message) => {
         //hacky but basically forces suggested responses to popup.
         bot.getUserProfile(message.from)
         .then((user) => {
-            bot.send(Bot.Message.text('Tap a day to see a menu:').addResponseKeyboard(
-              [
-                "Monday",
-                "Tuesday",
-                "Wednesday",
-                "Thursday",
-                "Friday",
-            ]), `${user.username}`);
+            bot.send(Bot.Message.text('Tap a day to see a menu:').addResponseKeyboard(generate_suggested()), `${user.username}`);
         });
     });
 
@@ -127,3 +116,32 @@ bot.onTextMessage((message) => {
 let server = http.createServer(bot.incoming());
 server.listen(process.env.PORT || config.port);
 console.log("Bot running on port " + config.port);
+
+
+
+////HELPER FUNCTIONS//////
+//generates what to append to
+let generate_suggested = function() {
+  //if its a weekday reply with defaults
+    return ['Today', 'Tomorrow', moment().add(1, 'days').format('dddd'), moment().add(2, 'days').format('dddd'), "Help I'm lost"];
+}
+let build_lunch_string = function(lunch){
+  let lunch_string = "Lunch, 11:30 am - 2:00 pm:\n";
+  for (var i = 0; i < lunch.length; i ++) {
+    lunch_string += (lunch[i]["product_name"]);
+    if (i < lunch.length-1) {
+      lunch_string += ",\n";
+    }
+  }
+  return lunch_string;
+}
+let build_dinner_string = function(dinner) {
+  let dinner_string ="Dinner, 4:30 - 8:00 pm:\n";
+  for (var i = 0; i < dinner.length; i ++) {
+    dinner_string += (dinner[i]["product_name"]);
+      if (i < dinner.length-1) {
+        dinner_string += ",\n";
+      }
+  }
+  return dinner_string;
+}
