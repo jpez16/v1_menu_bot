@@ -1,11 +1,14 @@
-//Imports
 'use strict';
+//get values
+let config = require('./config');
 let util = require('util');
 let http = require('http');
 let Bot  = require('@kikinteractive/kik');
 let moment = require('moment');
-let config = require('./config');
-let uwapi = require('uwapi')(config.uw_api_token);
+var uwaterlooApi = require('uwaterloo-api');
+var uwclient = new uwaterlooApi({
+  API_KEY : config.uw_api_token
+});
 /////////////////API ENDPOINT CONFIG////////////////////////
 let bot = new Bot({
     username: config.bot_name,
@@ -13,17 +16,6 @@ let bot = new Bot({
     baseUrl: config.base_url
 });
 bot.updateBotConfiguration();
-//bot.send(Bot.Message.text('Hey, nice to meet you!').addResponseKeyboard({
-//"type": "text",
-//"body": "Suggested text"
-//}), 'justinpezzack');
-
-///////////////////////////DEV///////////////////////////////
-//bot.send('Bot Active', 'justinpezzack');
-console.log(config);
-///////////////////////EVENT HANDLERS////////////////////////
-//Fires when a user talks to the bot for the very first time
-
 
 bot.onStartChattingMessage((message) => {
     bot.getUserProfile(message.from)
@@ -40,75 +32,64 @@ bot.onStartChattingMessage((message) => {
     });
 //Fires when a user sends a message
 bot.onTextMessage((message) => {
-        let week_days =["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-        let meals = ["lunch", "dinner"];
-        let lunch_asked = false;
-        let dinner_asked = false;
-        let day_dict = {"Monday" : 0, "Tuesday" : 1, "Wednesday" : 2, "Thursday" : 3, "Friday" : 4};
-        let msg = message['_state'].body.toLowerCase();
-        var query = false;
-        if (msg == "saturday"){
-
-        }
-        else if (msg == "sunday") {
-
-        }
-        if(msg.indexOf('lunch')>-1) {
-          lunch_asked = true;
-        }
-        else if(msg.indexOf('dinner')>-1) {
-          dinner_asked = true;
-        }
-        else {
-          dinner_asked = true;
-          lunch_asked = true;
-        }
-        for (var i =0; i < 5; i++) {
-          if (msg.indexOf(week_days[i].toLowerCase()) > -1) {
-            query = true;
-            msg = week_days[i];
-            break;
+        let days_to_show = generate_suggested(); //
+        //cleanup raw message from user
+        let orig_msg = message['_state'].body.toLowerCase();
+        //if msg = 'today' or 'tomorrow' will convert msg to the actual day using moment.js; else msg will pass through the function unmodified
+        let msg = generate_day(orig_msg);
+        let date_is_valid = false;
+        if (!(msg == orig_msg)){
+        //msg is now a date object
+        //only query when query = true;
+          if (msg.format('dddd') == "Saturday" || msg.format('dddd') == "Sunday") {
+            bot.getUserProfile(message.from)
+            .then((user) => {
+                bot.send(Bot.Message.text('There is no planned menu for '+ msg.format('dddd')+".").addResponseKeyboard(days_to_show), `${user.username}`);
+            });
+          } else {
+            date_is_valid = true;
           }
         }
-        //query == true when we have a valid date selected
-        if(query) {
-          let day = day_dict[msg];
-          uwapi.foodservicesMenu().then(function(data) {
+        //date_is_valid == true when we have a valid week day selected
+        if(date_is_valid) {
+          //msg is a date object at this point
+          let day = (msg.format('e')-1);// starts @ 0 vs moment starts @ 1
+          let year = msg.format('YYYY');
+          let week = msg.format('d');
+          uwclient.get('/foodservices/{year_}/{week_}/menu', {
+              year_ : year,
+              week_ : week,
+          }, function(err, res) {
             //CHECK FOR 4 DAY WEEK
-            let base_api_data = data['outlets'][0]['menu'];
+            console.log('parsed');
+            let base_api_data = res.data.outlets[0].menu;
             if(base_api_data.length < 5){
               //4 Day week
               if(base_api_data[0]['day'] == "Tuesday") {
                 day -=1;
-                if(msg == "Monday"){
+                if(msg.format('dddd') == "Monday"){
                   message.reply("There is no planned menu for " + msg + ".")
                 }
               } else {
-                if(msg == "Friday"){
+                if(msg.format('dddd') == "Friday"){
                   message.reply("There is no planned menu for " + msg + ".")
                 }
               }
             }
-            //LUNCH
-            if(lunch_asked){
-              let lunch = base_api_data[day]['meals']['lunch'];
-              let lunch_string = build_lunch_string(lunch);
-              message.reply(lunch_string);
-            }
-            //DINNER
-            if(dinner_asked) {
-              let dinner = base_api_data[day]['meals']['dinner'];
-              let dinner_string = build_dinner_string(dinner);
-              message.reply(dinner_string);
-            }
+            //BUILD LUNCH
+            let lunch = base_api_data[day]['meals']['lunch'];
+            let lunch_string = build_lunch_string(lunch);
+            message.reply(lunch_string);
+            //BUILD DINNER
+            let dinner = base_api_data[day]['meals']['dinner'];
+            let dinner_string = build_dinner_string(dinner);
+            message.reply(dinner_string);
           });
-        } else {
-          message.reply("Invalid day.");
         }
         //hacky but basically forces suggested responses to popup.
         bot.getUserProfile(message.from)
         .then((user) => {
-            bot.send(Bot.Message.text('Tap a day to see a menu:').addResponseKeyboard(generate_suggested()), `${user.username}`);
+            bot.send(Bot.Message.text('Tap a day to see a menu:').addResponseKeyboard(days_to_show), `${user.username}`);
         });
     });
 
@@ -118,12 +99,12 @@ server.listen(process.env.PORT || config.port);
 console.log("Bot running on port " + config.port);
 
 
-
+/////////////////////////////////////////////////////////////
 ////HELPER FUNCTIONS//////
 //generates what to append to
 let generate_suggested = function() {
   //if its a weekday reply with defaults
-    return ['Today', 'Tomorrow', moment().add(1, 'days').format('dddd'), moment().add(2, 'days').format('dddd'), "Help I'm lost"];
+    return ['Today', 'Tomorrow', moment().add(2, 'days').format('dddd'), moment().add(3, 'days').format('dddd'), "Help I'm lost"];
 }
 let build_lunch_string = function(lunch){
   let lunch_string = "Lunch, 11:30 am - 2:00 pm:\n";
@@ -145,3 +126,21 @@ let build_dinner_string = function(dinner) {
   }
   return dinner_string;
 }
+
+let generate_day = function(str) {
+  if (str.toLowerCase().indexOf('today') > -1)
+    return moment();
+  else if (str.toLowerCase().indexOf('tomorrow') > -1) {
+    return ((moment()).add(1, 'days'));
+  }
+  else {
+    for (var i = 2; i <7; i++ ){
+      if(str == moment().add(i, 'days').format('dddd').toLowerCase()) {
+        console.log((moment().add(i, 'days')).format('dddd'));
+        return (moment().add(i, 'days'));
+      }
+    }
+  }
+  return str;
+}
+
