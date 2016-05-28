@@ -20,14 +20,7 @@ bot.updateBotConfiguration();
 bot.onStartChattingMessage((message) => {
     bot.getUserProfile(message.from)
         .then((user) => {
-              bot.send(Bot.Message.text("Hi I'm V1Menu Bot! I can show you whats being served in the café! Tap a day to see the menu.").addResponseKeyboard(
-                [
-                  "Monday",
-                  "Tuesday",
-                  "Wednesday",
-                  "Thursday",
-                  "Friday",
-              ]), `${user.username}`);
+              bot.send(Bot.Message.text("Hi I'm V1 Menu Bot! I can show you whats being served in the café! Tap a day to see the menu").addResponseKeyboard(generate_suggested()), `${user.username}`);
         });
     });
 //Fires when a user sends a message
@@ -38,7 +31,7 @@ bot.onTextMessage((message) => {
         //if msg = 'today' or 'tomorrow' will convert msg to the actual day using moment.js; else msg will pass through the function unmodified
         let msg = generate_day(orig_msg);
         let date_is_valid = false;
-        if (!(msg == orig_msg)){
+        if (!(msg == orig_msg)) {
         //msg is now a date object
         //only query when query = true;
           if (msg.format('dddd') == "Saturday" || msg.format('dddd') == "Sunday") {
@@ -86,11 +79,17 @@ bot.onTextMessage((message) => {
             message.reply(dinner_string);
           });
         }
-        //hacky but basically forces suggested responses to popup.
+        else if (msg.indexOf('help') > -1) {
+          bot.getUserProfile(message.from)
+          .then((user) => {
+              bot.send(Bot.Message.text('Visit http://justinpezzack.io/v1menubot for help and information').addResponseKeyboard(days_to_show), `${user.username}`);
+          });
+        } else {
         bot.getUserProfile(message.from)
         .then((user) => {
-            bot.send(Bot.Message.text('Tap a day to see a menu:').addResponseKeyboard(days_to_show), `${user.username}`);
+            bot.send(Bot.Message.text('Tap a day to see a menu').addResponseKeyboard(days_to_show), `${user.username}`);
         });
+      }
     });
 
 ///////////////////////SERVER CONFIG/////////////////////////
@@ -143,4 +142,3 @@ let generate_day = function(str) {
   }
   return str;
 }
-
