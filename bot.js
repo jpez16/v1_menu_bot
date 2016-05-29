@@ -32,19 +32,16 @@ bot.onTextMessage((message) => {
         let msg = generate_day(orig_msg);
         let date_is_valid = false;
         if (!(msg == orig_msg)) {
-        //msg is now a date object
-        //only query when query = true;
-          if (msg.format('dddd') == "Saturday" || msg.format('dddd') == "Sunday") {
-            bot.getUserProfile(message.from)
-            .then((user) => {
-                bot.send(Bot.Message.text('There is no planned menu for '+ msg.format('dddd')+".").addResponseKeyboard(days_to_show), `${user.username}`);
-            });
-          } else {
             date_is_valid = true;
           }
+        if (msg.format('dddd') == "Saturday" || msg.format('dddd') == "Sunday") {
+          bot.getUserProfile(message.from)
+            .then((user) => {
+                bot.send(Bot.Message.text('There is no planned menu for '+ msg.format('dddd')+".").addResponseKeyboard(days_to_show), `${user.username}`);
+          });
         }
         //date_is_valid == true when we have a valid week day selected
-        if(date_is_valid) {
+        else if(date_is_valid) {
           //msg is a date object at this point
           let day = (msg.format('e')-1);// starts @ 0 vs moment starts @ 1
           let year = msg.format('YYYY');
