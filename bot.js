@@ -73,7 +73,11 @@ bot.onTextMessage((message) => {
             //BUILD DINNER
             let dinner = base_api_data[day]['meals']['dinner'];
             let dinner_string = build_dinner_string(dinner);
-            message.reply(dinner_string);
+            //kinda hacky again, need to have better implementation of the keyboard popping up
+            bot.getUserProfile(message.from)
+            .then((user) => {
+                bot.send(Bot.Message.text(dinner_string).addResponseKeyboard(days_to_show), `${user.username}`);
+            });
           });
         }
         else if (msg.indexOf('help') > -1) {
