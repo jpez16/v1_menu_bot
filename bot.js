@@ -31,22 +31,37 @@ bot.onTextMessage((message) => {
         //if msg = 'today' or 'tomorrow' will convert msg to the actual day using moment.js; else msg will pass through the function unmodified
         let msg = generate_day(orig_msg);
         let date_is_valid = false;
+        //this if block deals with error/help messages or did we recieve a proper date?_
         if (!(msg == orig_msg)) {
         //msg is now a date object
         //only query when query = true;
           if (msg.format('dddd') == "Saturday" || msg.format('dddd') == "Sunday") {
-            bot.getUserProfile(message.from)
-            .then((user) => {
-                bot.send(Bot.Message.text('There is no planned menu for '+ msg.format('dddd')+".").addResponseKeyboard(days_to_show), `${user.username}`);
-            });
+              bot.getUserProfile(message.from)
+              .then((user) => {
+                  bot.send(Bot.Message.text('There is no planned menu for '+ msg.format('dddd')+".").addResponseKeyboard(days_to_show), `${user.username}`);
+                });
+            return;
           } else {
-            date_is_valid = true;
+              date_is_valid = true;
           }
         }
-        //date_is_valid == true when we have a valid week day selected
+        else if (msg.indexOf('help') > -1) {
+          bot.getUserProfile(message.from)
+          .then((user) => {
+              bot.send(Bot.Message.text('Visit http://justinpezzack.io/v1menubot for help and information').addResponseKeyboard(days_to_show), `${user.username}`);
+          });
+          return;
+        } else {
+          bot.getUserProfile(message.from)
+            .then((user) => {
+              bot.send(Bot.Message.text('Tap a day to see a menu').addResponseKeyboard(days_to_show), `${user.username}`);
+            });
+          return;
+        }
+        //date_is_valid == true when we have a valid week day selecte
         if(date_is_valid) {
           //msg is a date object at this point
-          let day = (msg.format('e')-1);// starts @ 0 vs moment starts @ 1
+          let day = (msg.format('e')-1);// uwapi starts @ 0 vs moment.js starts @ 1
           let year = msg.format('YYYY');
           let week = msg.format('d');
           uwclient.get('/foodservices/{year_}/{week_}/menu', {
@@ -79,17 +94,6 @@ bot.onTextMessage((message) => {
             message.reply(dinner_string);
           });
         }
-        else if (msg.indexOf('help') > -1) {
-          bot.getUserProfile(message.from)
-          .then((user) => {
-              bot.send(Bot.Message.text('Visit http://justinpezzack.io/v1menubot for help and information').addResponseKeyboard(days_to_show), `${user.username}`);
-          });
-        } else {
-        bot.getUserProfile(message.from)
-        .then((user) => {
-            bot.send(Bot.Message.text('Tap a day to see a menu').addResponseKeyboard(days_to_show), `${user.username}`);
-        });
-      }
     });
 
 ///////////////////////SERVER CONFIG/////////////////////////
@@ -135,7 +139,6 @@ let generate_day = function(str) {
   else {
     for (var i = 2; i <7; i++ ){
       if(str == moment().add(i, 'days').format('dddd').toLowerCase()) {
-        console.log((moment().add(i, 'days')).format('dddd'));
         return (moment().add(i, 'days'));
       }
     }
