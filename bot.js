@@ -91,7 +91,11 @@ bot.onTextMessage((message) => {
             //BUILD DINNER
             let dinner = base_api_data[day]['meals']['dinner'];
             let dinner_string = build_dinner_string(dinner);
-            message.addResponseKeyboard(days_to_show).reply(dinner_string);
+            //temporary and hacky af I need to fix this for msg.reply
+            bot.getUserProfile(message.from)
+            .then((user) => {
+                bot.send(Bot.Message.text(dinner_string).addResponseKeyboard(days_to_show), `${user.username}`);
+              });
           });
         }
     });
@@ -107,7 +111,7 @@ console.log("Bot running on port " + config.port);
 //generates what to append to
 let generate_suggested = function() {
   //if its a weekday reply with defaults
-    return ['Today', 'Tomorrow', moment().add(2, 'days').format('dddd'), moment().add(3, 'days').format('dddd'), "Help I'm lost"];
+    return ['Today', 'Tomorrow', moment().add(2, 'days').format('dddd'), moment().add(3, 'days').format('dddd'), "Help and Information"];
 }
 let build_lunch_string = function(lunch){
   let lunch_string = "Lun: 11:30am - 2:00pm\n";
