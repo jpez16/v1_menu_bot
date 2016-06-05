@@ -69,7 +69,6 @@ bot.onTextMessage((message) => {
               week_ : week,
           }, function(err, res) {
             //CHECK FOR 4 DAY WEEK
-            console.log('parsed');
             let base_api_data = res.data.outlets[0].menu;
             if(base_api_data.length < 5){
               //4 Day week
@@ -85,13 +84,14 @@ bot.onTextMessage((message) => {
               }
             }
             //BUILD LUNCH
+            message.reply('Being served on \n' + msg.format('dddd[,] MMMM Do'));
             let lunch = base_api_data[day]['meals']['lunch'];
             let lunch_string = build_lunch_string(lunch);
             message.reply(lunch_string);
             //BUILD DINNER
             let dinner = base_api_data[day]['meals']['dinner'];
             let dinner_string = build_dinner_string(dinner);
-            message.reply(dinner_string);
+            message.addResponseKeyboard(days_to_show).reply(dinner_string);
           });
         }
     });
@@ -110,7 +110,7 @@ let generate_suggested = function() {
     return ['Today', 'Tomorrow', moment().add(2, 'days').format('dddd'), moment().add(3, 'days').format('dddd'), "Help I'm lost"];
 }
 let build_lunch_string = function(lunch){
-  let lunch_string = "Lunch, 11:30 am - 2:00 pm:\n";
+  let lunch_string = "Lun: 11:30am - 2:00pm\n";
   for (var i = 0; i < lunch.length; i ++) {
     lunch_string += (lunch[i]["product_name"]);
     if (i < lunch.length-1) {
@@ -120,7 +120,7 @@ let build_lunch_string = function(lunch){
   return lunch_string;
 }
 let build_dinner_string = function(dinner) {
-  let dinner_string ="Dinner, 4:30 - 8:00 pm:\n";
+  let dinner_string ="Din: 4:30 - 8:00pm\n";
   for (var i = 0; i < dinner.length; i ++) {
     dinner_string += (dinner[i]["product_name"]);
       if (i < dinner.length-1) {
